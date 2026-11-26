@@ -317,6 +317,21 @@ int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
     int validation_result;
     const char* type_string;
 
+    /*
+     * Adaptive-Argon2 versioned envelope:
+     *   $a2ad$v=..$pv=..$tier=..$m=..,t=..,p=..$$<$stock PHC$>
+     * Unwrap to the embedded stock PHC string so every stock
+     * argon2*_verify() entry point accepts envelope hashes while the
+     * type prefix is still checked against the requested verifier type.
+     */
+    if (strncmp(str, "$a2ad$", 6) == 0) {
+        const char *embedded = strstr(str + 6, "$argon2");
+        if (embedded == NULL) {
+            return ARGON2_DECODING_FAIL;
+        }
+        return decode_string(ctx, embedded, type);
+    }
+
     /* We should start with the argon2_type we are using */
     type_string = argon2_type2string(type, 0);
     if (!type_string) {

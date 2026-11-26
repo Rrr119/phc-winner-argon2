@@ -301,3 +301,18 @@ Neves, 2013-2015, and under
 [CC0 License](https://creativecommons.org/about/cc0).
 
 All licenses are therefore GPL-compatible.
+
+## Adaptive parameters and versioned hashes
+
+This tree includes an optional adaptive layer for high-concurrency login
+services: load/concurrency based Argon2 parameter selection with a security
+floor, a versioned `$a2ad$` envelope that stores the exact `m/t/p`
+parameters alongside the stock PHC string, transparent compatibility of
+old hashes with the existing `argon2*_verify()` functions, and JSON-lines
+parameter-change audit logging.
+
+See [`ADAPTIVE.md`](ADAPTIVE.md) for the format, API and operations guide.
+Run `make test-adaptive` (or `./acceptance.sh`) for the 264-check acceptance
+suite covering 1/8/32 concurrency pressures, legacy hash verification and
+audit log output; the public declarations live in
+[`include/argon2_adaptive.h`](include/argon2_adaptive.h).

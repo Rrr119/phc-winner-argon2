@@ -1,0 +1,17 @@
+{
+  "root": "/home/dev/feedback/uid38848",
+  "B": "/home/dev/feedback/uid38848",
+  "sha": "7ea959096d24233dbebd6051f9fc1b1e42f448ac",
+  "wslDistro": "Ubuntu-26.04",
+  "source": {
+    "owner": "P-H-C",
+    "repo": "phc-winner-argon2",
+    "sha": "7ea959096d24233dbebd6051f9fc1b1e42f448ac"
+  },
+  "fork": {
+    "owner": "Rrr119",
+    "repo": "phc-winner-argon2",
+    "cloneUrl": "https://github.com/Rrr119/phc-winner-argon2.git"
+  },
+  "at": "2026-11-25T22:15:18.013Z"
+}

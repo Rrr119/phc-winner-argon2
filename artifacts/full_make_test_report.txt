@@ -1,0 +1,358 @@
+Building with optimizations for native
+cc -std=c89 -O3 -Wall -g -Iinclude -Isrc -pthread -march=native  -Wextra -Wno-type-limits src/argon2.c src/core.c src/blake2/blake2b.c src/thread.c src/encoding.c src/adaptive.c src/opt.c src/test.c -o testcase
+Default build
+argon2i v=16: OK
+argon2d v=16: OK
+argon2id v=16: OK
+argon2i v=19: OK
+argon2d v=19: OK
+argon2id v=19: OK
+Force OPTTEST=1
+argon2i v=16: OK
+argon2d v=16: OK
+argon2id v=16: OK
+argon2i v=19: OK
+argon2d v=19: OK
+argon2id v=19: OK
+./testcase
+Test Argon2i version number: 10
+Hash test: $v=16 t=2, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=16 t=2, m=18, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=16 t=2, m=8, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=16 t=2, m=8, p=2, pass=password, salt=somesalt: PASS
+Hash test: $v=16 t=1, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=16 t=4, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=16 t=2, m=16, p=1, pass=differentpassword, salt=somesalt: PASS
+Hash test: $v=16 t=2, m=16, p=1, pass=password, salt=diffsalt: PASS
+Recognise an invalid encoding: PASS
+Recognise an invalid encoding: PASS
+Recognise an invalid salt in encoding: PASS
+Verify with mismatched password: PASS
+Decode an error message: PASS
+
+Test Argon2i version number: 13
+Hash test: $v=19 t=2, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=18, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=8, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=8, p=2, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=1, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=4, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=16, p=1, pass=differentpassword, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=16, p=1, pass=password, salt=diffsalt: PASS
+Recognise an invalid encoding: PASS
+Recognise an invalid encoding: PASS
+Recognise an invalid salt in encoding: PASS
+Verify with mismatched password: PASS
+Decode an error message: PASS
+
+Test Argon2id version number: 13
+Hash test: $v=19 t=2, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=18, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=8, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=8, p=2, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=1, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=4, m=16, p=1, pass=password, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=16, p=1, pass=differentpassword, salt=somesalt: PASS
+Hash test: $v=19 t=2, m=16, p=1, pass=password, salt=diffsalt: PASS
+
+Common error state tests
+Fail on invalid memory: PASS
+Fail on invalid null pointer: PASS
+Fail on salt too short: PASS
+cc -std=c89 -O3 -Wall -g -Iinclude -Isrc -pthread -march=native -Wextra -Wno-type-limits src/argon2.c src/core.c src/blake2/blake2b.c src/thread.c src/encoding.c src/adaptive.c src/opt.c src/adaptive_acceptance.c -o adaptive_acceptance
+./adaptive_acceptance argon2_param_audit.log
+=== Adaptive Argon2 acceptance ===
+audit log: /home/dev/feedback/uid38848/argon2_param_audit.log
+  [ok]   adaptive controller initialises
+
+[1/5] three concurrency pressures (deterministic) ---
+  [ok]   observe sample accepted
+  [ok]   concurrency band maps to expected tier
+  concurrency= 1 -> tier=low    t=3 m=256KiB p=2 work(t*m)=768
+  [ok]   observe sample accepted
+  [ok]   concurrency band maps to expected tier
+  concurrency= 8 -> tier=medium t=2 m=128KiB p=1 work(t*m)=256
+  [ok]   observe sample accepted
+  [ok]   concurrency band maps to expected tier
+  concurrency=32 -> tier=high   t=1 m=64KiB p=1 work(t*m)=64
+  [ok]   low and medium pressures select different parameters
+  [ok]   medium and high pressures select different parameters
+  [ok]   hashing work factor decreases monotonically under pressure
+  [ok]   critical sample accepted
+  [ok]   critical concurrency raises overload advisory
+  [ok]   critical load keeps HIGH/floor tier
+  [ok]   critical parameters stay at/above the security floor
+  [ok]   overload clears after pressure drops
+
+[2/5] security floor clamping ---
+  [ok]   floor-test controller initialises
+  [ok]   sub-floor profile is clamped up to the security floor
+  [ok]   hash with clamped floor parameters succeeds
+  [ok]   clamped hash verifies
+
+[3/5] real pthread concurrency pressures ---
+
+-- real concurrency round: 1 in-flight logins --
+  [ok]   barrier init (all_in)
+  [ok]   barrier init (may_leave)
+  [ok]   pthread_create worker
+  [ok]   gauge counts all in-flight workers
+  [ok]   real concurrency selects expected pressure tier
+  active=1 -> tier=low
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+
+-- real concurrency round: 8 in-flight logins --
+  [ok]   barrier init (all_in)
+  [ok]   barrier init (may_leave)
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   gauge counts all in-flight workers
+  [ok]   real concurrency selects expected pressure tier
+  active=8 -> tier=medium
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+
+-- real concurrency round: 32 in-flight logins --
+  [ok]   barrier init (all_in)
+  [ok]   barrier init (may_leave)
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   pthread_create worker
+  [ok]   gauge counts all in-flight workers
+  [ok]   real concurrency selects expected pressure tier
+  active=32 -> tier=high
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+  [ok]   worker adaptive hash succeeds
+  [ok]   worker adaptive verify succeeds
+  [ok]   stock argon2id_verify accepts versioned hash
+
+[4/5] versioned format and legacy compatibility ---
+  [ok]   argon2id v19 m=256 legacy hash
+  [ok]   stock verify validates the same legacy hash
+  [ok]   wrong password on legacy hash is rejected
+  [ok]   legacy hash is flagged for transparent rehash
+  [ok]   argon2i  v19 m=256 legacy hash
+  [ok]   stock verify validates the same legacy hash
+  [ok]   wrong password on legacy hash is rejected
+  [ok]   legacy hash is flagged for transparent rehash
+  [ok]   argon2i  v1.0 m=65536 legacy hash
+  [ok]   stock verify validates the same legacy hash
+  [ok]   wrong password on legacy hash is rejected
+  [ok]   legacy hash is flagged for transparent rehash
+  [ok]   adaptive envelope hash succeeds
+  [ok]   new hash carries the versioned envelope prefix
+  [ok]   envelope parses
+  [ok]   envelope reports format and policy versions
+  [ok]   envelope records the selecting tier
+  [ok]   envelope stores the exact applied m/t/p parameters
+  [ok]   envelope embeds a stock PHC string
+  [ok]   adaptive verify accepts new envelope hash
+  [ok]   wrong password on envelope hash is rejected
+  [ok]   existing argon2id_verify accepts new envelope hash
+  [ok]   fresh envelope hash needs no rehash
+  [ok]   tampered envelope hash is rejected
+  tier=low    stored=$a2ad$v=1$pv=1$tier=0$m=256,t=3,p=2$$argon2id$v=19$m=256,t=3,p=2$5QmdugTAAk4g0IsF0eG+YQ$2AwP+8ZhslG9EBc+ZoZzteusJfm85+ZHL/sFwRDXENQ
+  [ok]   adaptive envelope hash succeeds
+  [ok]   new hash carries the versioned envelope prefix
+  [ok]   envelope parses
+  [ok]   envelope reports format and policy versions
+  [ok]   envelope records the selecting tier
+  [ok]   envelope stores the exact applied m/t/p parameters
+  [ok]   envelope embeds a stock PHC string
+  [ok]   adaptive verify accepts new envelope hash
+  [ok]   wrong password on envelope hash is rejected
+  [ok]   existing argon2id_verify accepts new envelope hash
+  [ok]   fresh envelope hash needs no rehash
+  [ok]   tampered envelope hash is rejected
+  tier=medium stored=$a2ad$v=1$pv=1$tier=1$m=128,t=2,p=1$$argon2id$v=19$m=128,t=2,p=1$wgFvVhs5d7THrd1vsdM/Sw$G3O085kbBx2+CiD2mXaOTnucfJd+EqL5d4av/SeGM2E
+  [ok]   adaptive envelope hash succeeds
+  [ok]   new hash carries the versioned envelope prefix
+  [ok]   envelope parses
+  [ok]   envelope reports format and policy versions
+  [ok]   envelope records the selecting tier
+  [ok]   envelope stores the exact applied m/t/p parameters
+  [ok]   envelope embeds a stock PHC string
+  [ok]   adaptive verify accepts new envelope hash
+  [ok]   wrong password on envelope hash is rejected
+  [ok]   existing argon2id_verify accepts new envelope hash
+  [ok]   fresh envelope hash needs no rehash
+  [ok]   tampered envelope hash is rejected
+  tier=high   stored=$a2ad$v=1$pv=1$tier=2$m=64,t=1,p=1$$argon2id$v=19$m=64,t=1,p=1$fWFjGaxmuAo6yuBk/Q3tAg$BHGAv9TidjqsPzAJLyTKAlGzccuNe8yMjBaKoBEtkig
+  [ok]   default controller login_hash produces envelope
+  [ok]   default controller login_verify succeeds
+  [ok]   default controller rejects wrong password
+
+[5/5] audit log ---
+  [ok]   in-memory audit ring recorded events
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   parameter_change event carries a real delta
+  [ok]   multiple parameter changes were audited
+  [ok]   overload transition was audited
+  [ok]   audit file contains init record
+  [ok]   audit file contains param_change records
+  [ok]   audit file records a switch to the high-pressure tier
+  [ok]   audit file contains multiple JSON-lines records
+  audit file: argon2_param_audit.log (28 JSON lines)
+
+=== 264 checks, 0 failure(s) ===
+ALL ADAPTIVE ARGON2 ACCEPTANCE CHECKS PASSED

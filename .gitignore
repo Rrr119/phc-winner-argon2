@@ -10,6 +10,7 @@ genkat
 .idea
 *.pyc
 testcase
+adaptive_acceptance
 *.gcda
 *.gcno
 *.gcov

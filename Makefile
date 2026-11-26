@@ -31,11 +31,13 @@ ABI_VERSION = 1
 
 DIST = phc-winner-argon2
 
-SRC = src/argon2.c src/core.c src/blake2/blake2b.c src/thread.c src/encoding.c
+SRC = src/argon2.c src/core.c src/blake2/blake2b.c src/thread.c src/encoding.c src/adaptive.c
 SRC_RUN = src/run.c
 SRC_BENCH = src/bench.c
 SRC_GENKAT = src/genkat.c
 OBJ = $(SRC:.c=.o)
+ADAPTIVE_ACCEPTANCE = adaptive_acceptance
+AUDIT_LOG = argon2_param_audit.log
 
 CFLAGS += -std=c89 -O3 -Wall -g -Iinclude -Isrc
 
@@ -127,7 +129,7 @@ endif
 AR=ar
 
 LIBRARIES = $(LIB_SH) $(LIB_ST)
-HEADERS = include/argon2.h
+HEADERS = include/argon2.h include/argon2_adaptive.h
 
 INSTALL = install
 
@@ -190,7 +192,7 @@ $(LIB_ST): 	$(OBJ)
 clean:
 		rm -f '$(RUN)' '$(BENCH)' '$(GENKAT)'
 		rm -f '$(LIB_SH)' '$(LIB_ST)' kat-argon2* '$(PC_NAME)'
-		rm -f testcase
+		rm -f testcase '$(ADAPTIVE_ACCEPTANCE)'
 		rm -rf *.dSYM
 		cd src/ && rm -f *.o
 		cd src/blake2/ && rm -f *.o
@@ -220,6 +222,17 @@ test:           $(SRC) src/test.c
 		$(CC) $(CFLAGS)  -Wextra -Wno-type-limits $^ -o testcase
 		@sh kats/test.sh
 		./testcase
+		$(CC) $(CFLAGS) -Wextra -Wno-type-limits $(SRC) src/adaptive_acceptance.c -o $(ADAPTIVE_ACCEPTANCE)
+		./$(ADAPTIVE_ACCEPTANCE) $(AUDIT_LOG)
+
+.PHONY: test-adaptive
+test-adaptive:  $(SRC) src/adaptive_acceptance.c
+		$(CC) $(CFLAGS) -Wextra -Wno-type-limits $^ -o $(ADAPTIVE_ACCEPTANCE)
+		./$(ADAPTIVE_ACCEPTANCE) $(AUDIT_LOG)
+
+.PHONY: acceptance
+acceptance:
+		./acceptance.sh
 
 .PHONY: testci
 testci:         $(SRC) src/test.c
